@@ -90,12 +90,20 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="空灵画师的小站~">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="前后端分离指前后端只通过 JSON 来交流，组件化、工程化不需要依赖后端去实现。本文将选择 spring boot 和 vue（使用vue-cli构建）进行实现。在阅读此篇文章之前希望你已经简单了解过 spring boot 和 vue。 1.创建 spring boot 项目你可以去自行去官网创建并下载，或者使用你所熟悉的IDE创建，本项目只需要勾选Web依赖。 写一个简单的 controlle">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初试前后端分离：使用spring boot和vue ">
+<meta property="og:url" content="http://yoursite.com/2017/04/21/初试前后端分离：使用spring-boot和vue/index.html">
 <meta property="og:site_name" content="空灵画师的小站~">
+<meta property="og:description" content="前后端分离指前后端只通过 JSON 来交流，组件化、工程化不需要依赖后端去实现。本文将选择 spring boot 和 vue（使用vue-cli构建）进行实现。在阅读此篇文章之前希望你已经简单了解过 spring boot 和 vue。 1.创建 spring boot 项目你可以去自行去官网创建并下载，或者使用你所熟悉的IDE创建，本项目只需要勾选Web依赖。 写一个简单的 controlle">
+<meta property="og:image" content="http://yoursite.com/img/vueInit.png">
+<meta property="og:image" content="http://yoursite.com/img/success.png">
+<meta property="og:updated_time" content="2017-04-21T08:45:51.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="空灵画师的小站~">
+<meta name="twitter:title" content="初试前后端分离：使用spring boot和vue ">
+<meta name="twitter:description" content="前后端分离指前后端只通过 JSON 来交流，组件化、工程化不需要依赖后端去实现。本文将选择 spring boot 和 vue（使用vue-cli构建）进行实现。在阅读此篇文章之前希望你已经简单了解过 spring boot 和 vue。 1.创建 spring boot 项目你可以去自行去官网创建并下载，或者使用你所熟悉的IDE创建，本项目只需要勾选Web依赖。 写一个简单的 controlle">
+<meta name="twitter:image" content="http://yoursite.com/img/vueInit.png">
 
 
 
@@ -123,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/04/21/初试前后端分离：使用spring-boot和vue/"/>
 
 
 
 
 
-  <title> 空灵画师的小站~ </title>
+  <title> 初试前后端分离：使用spring boot和vue  | 空灵画师的小站~ </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -154,9 +162,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-   page-home 
- ">
+  <div class="container sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -249,9 +255,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -281,10 +287,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2017/04/21/初试前后端分离：使用spring-boot和vue/" itemprop="url">
-                  初试前后端分离：使用spring boot和vue 
-                </a>
+                初试前后端分离：使用spring boot和vue 
               
             
           </h1>
@@ -335,9 +338,7 @@
       
 
       
-        
-          
-            <p>前后端分离指前后端只通过 <strong>JSON</strong> 来交流，组件化、工程化不需要依赖后端去实现。本文将选择 <strong>spring boot</strong> 和 <strong>vue</strong>（使用<strong>vue-cli</strong>构建）进行实现。在阅读此篇文章之前希望你已经简单了解过 <strong>spring boot</strong> 和 <strong>vue</strong>。</p>
+        <p>前后端分离指前后端只通过 <strong>JSON</strong> 来交流，组件化、工程化不需要依赖后端去实现。本文将选择 <strong>spring boot</strong> 和 <strong>vue</strong>（使用<strong>vue-cli</strong>构建）进行实现。在阅读此篇文章之前希望你已经简单了解过 <strong>spring boot</strong> 和 <strong>vue</strong>。</p>
 <h2 id="1-创建-spring-boot-项目"><a href="#1-创建-spring-boot-项目" class="headerlink" title="1.创建 spring boot 项目"></a>1.创建 <strong>spring boot</strong> 项目</h2><p>你可以去自行去<a href="https://start.spring.io" target="_blank" rel="external">官网</a>创建并下载，或者使用你所熟悉的IDE创建，本项目只需要勾选Web依赖。</p>
 <h3 id="写一个简单的-controller"><a href="#写一个简单的-controller" class="headerlink" title="写一个简单的 controller"></a>写一个简单的 <strong>controller</strong></h3><p>在 <strong>spring boot</strong> 的 <strong>application</strong> 类的同级目录下创建 <strong>controller</strong> 包，并在其中创建 <strong>HomeController</strong> 类，该类用于处理一些 <strong>rest</strong> 请求，代码如下:</p>
 <pre><code>@RestController
@@ -430,20 +431,27 @@ new Vue({
 <p>可以看到后端返回的“Hello World!”已经被渲染在页面上了。</p>
 <h3 id="最后附一下这两个项目的源码："><a href="#最后附一下这两个项目的源码：" class="headerlink" title="最后附一下这两个项目的源码："></a>最后附一下这两个项目的源码：</h3><p><a href="https://github.com/xuzhangtian/springboot-vue-demo-frontend" target="_blank" rel="external">springboot-vue-demo-frontend</a><br><a href="https://github.com/xuzhangtian/springboot-vue-demo-backend" target="_blank" rel="external">springboot-vue-demo-backend</a></p>
 
-          
+      
+    </div>
+
+    <div>
+      
         
+
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
     <div>
+      
+        
+
       
     </div>
 
@@ -451,21 +459,22 @@ new Vue({
       
 
       
-
+        
       
 
       
+
       
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -473,6 +482,10 @@ new Vue({
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -492,8 +505,17 @@ new Vue({
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/batman.png"
@@ -537,6 +559,22 @@ new Vue({
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-创建-spring-boot-项目"><span class="nav-number">1.</span> <span class="nav-text">1.创建 spring boot 项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#写一个简单的-controller"><span class="nav-number">1.1.</span> <span class="nav-text">写一个简单的 controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#后端用-cors-来解决跨域问题"><span class="nav-number">1.2.</span> <span class="nav-text">后端用 cors 来解决跨域问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建前端-vue-项目"><span class="nav-number">2.</span> <span class="nav-text">创建前端 vue 项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用axios来解决跨域问题"><span class="nav-number">2.1.</span> <span class="nav-text">使用axios来解决跨域问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最后附一下这两个项目的源码："><span class="nav-number">2.2.</span> <span class="nav-text">最后附一下这两个项目的源码：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -657,6 +695,10 @@ new Vue({
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
 
   
 
