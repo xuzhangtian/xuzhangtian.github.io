@@ -121,7 +121,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">2</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -139,6 +139,121 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/08/01/seatunnel-engine-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="xuzhangtian">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="空灵画师的小站~">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 空灵画师的小站~">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/08/01/seatunnel-engine-1/" class="post-title-link" itemprop="url">SeaTunnel 介绍</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-08-01 13:50:22" itemprop="dateCreated datePublished" datetime="2023-08-01T13:50:22+08:00">2023-08-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-02 09:30:35" itemprop="dateModified" datetime="2023-08-02T09:30:35+08:00">2023-08-02</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="SeaTunnel-是什么"><a href="#SeaTunnel-是什么" class="headerlink" title="SeaTunnel 是什么"></a>SeaTunnel 是什么</h2><ul>
+<li>SeaTunnel 是一个非常易于使用、超高性能的分布式数据集成平台，支持大规模数据的实时同步。它能够每天稳定高效地同步数百亿条数据，并已经被近100家公司投入生产使用。</li>
+</ul>
+<h2 id="SeaTunnel-可以解决哪些问题"><a href="#SeaTunnel-可以解决哪些问题" class="headerlink" title="SeaTunnel 可以解决哪些问题"></a>SeaTunnel 可以解决哪些问题</h2><ul>
+<li>各种数据源：存在数百种常用数据源，其版本不兼容。随着新技术的出现，出现了更多的数据源。用户很难找到一个能够完全快速支持这些数据源的工具。</li>
+<li>复杂的同步场景：数据同步需要支持离线全量同步、离线增量同步、CDC（变更数据捕获）、实时同步以及全数据库同步等多种同步场景。</li>
+<li>高资源需求：现有的数据集成和数据同步工具通常需要大量计算资源或 JDBC 连接资源，以完成对大量小表的实时同步。这增加了企业的负担。</li>
+<li>缺乏质量和监控：数据集成和同步过程经常出现数据丢失或重复。同步过程缺乏监控，无法直观地了解任务过程中数据的真实情况。</li>
+<li>复杂的技术栈：企业使用的技术组件各不相同，用户需要为不同组件开发相应的同步程序，以完成数据集成。</li>
+<li>管理和维护困难：受限于不同的底层技术组件（如 Flink&#x2F;Spark），离线同步和实时同步通常需要分别开发和管理，增加了管理和维护的难度。</li>
+</ul>
+<h2 id="SeaTunnel-有哪些特性"><a href="#SeaTunnel-有哪些特性" class="headerlink" title="SeaTunnel 有哪些特性"></a>SeaTunnel 有哪些特性</h2><h3 id="多源支持、生态活跃"><a href="#多源支持、生态活跃" class="headerlink" title="多源支持、生态活跃"></a>多源支持、生态活跃</h3><ul>
+<li>SeaTunnel 提供了一个不依赖于特定执行引擎的 Connector API。基于该 API 开发的 Connector（<code>Source</code>, <code>Transform</code>, <code>Sink</code>）可以运行在许多不同的引擎上。</li>
+<li>Connector 插件设计允许用户轻松开发自己的 Connector 并将其集成到 SeaTunnel 项目中。目前，SeaTunnel 支持 100 多种 Connector，并且数量不断增加。</li>
+</ul>
+<h3 id="分布式支持"><a href="#分布式支持" class="headerlink" title="分布式支持"></a>分布式支持</h3><ul>
+<li>SeaTunnel Engine 是用<code>Hazelcast</code>做集群管理的，可以独立实现集群管理、快照存储和集群高可用功能。</li>
+<li>SeaTunnel 采用分布式快照算法等方法来保证数据的一致性，确保在数据同步过程中不会出现数据丢失或重复</li>
+</ul>
+<h3 id="多引擎支持"><a href="#多引擎支持" class="headerlink" title="多引擎支持"></a>多引擎支持</h3><ul>
+<li>SeaTunnel 默认使用 SeaTunnel 引擎进行数据同步，同时还支持将 Flink 或 Spark 作为 Connector 的执行引擎，以适应企业现有的技术组件。SeaTunnel 支持多个版本的 Spark 和 Flink。</li>
+</ul>
+<h3 id="数据处理优化"><a href="#数据处理优化" class="headerlink" title="数据处理优化"></a>数据处理优化</h3><ul>
+<li>批处理-流处理一体化，基于 SeaTunnel Connector API 开发的 Connector 与离线同步、实时同步、全量同步、增量同步等场景完全兼容，大大降低了数据集成任务的管理难度。</li>
+<li>支持多表或整个数据库的同步，解决了过多 JDBC 连接的问题；并支持多表或整个数据库日志的读取和解析，解决了CDC多表同步场景下重复读取和解析日志的问题。</li>
+<li>支持并行读写，提供高吞吐量和低延迟的稳定可靠的数据同步能力。</li>
+</ul>
+<h2 id="SeaTunnel-工作流程图"><a href="#SeaTunnel-工作流程图" class="headerlink" title="SeaTunnel 工作流程图"></a>SeaTunnel 工作流程图</h2><p><img src="/2023/08/01/seatunnel-engine-1/work-flow.png" alt="work-flow.png"><br>SeaTunnel 的运行过程如上图所示。</p>
+<p>用户配置作业信息并选择执行引擎来提交作业。</p>
+<p>源连接器（Source）负责并行读取数据，并将数据发送给下游的转换器（Transform）或直接发送给数据接收器（Sink），而数据接收器则将数据写入目标地。值得注意的是，源、转换器和数据接收器可以通过用户自行开发和扩展。</p>
+<p>SeaTunnel 是一个EL(T) 数据集成平台。因此，在 SeaTunnel 中，转换器只能用于执行一些简单的数据转换操作，例如将某一列的数据转换为大写或小写、更改列名或将一列拆分为多个列。</p>
+<p>SeaTunnel 默认使用的引擎是 SeaTunnel Engine。如果选择使用 Flink 或 Spark 引擎，SeaTunnel 将会将连接器打包成 Flink 或 Spark 程序，并提交给 Flink 或 Spark 来运行。</p>
+<h2 id="SeaTunnel-核心组件-Connector"><a href="#SeaTunnel-核心组件-Connector" class="headerlink" title="SeaTunnel 核心组件 Connector"></a>SeaTunnel 核心组件 Connector</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="https://seatunnel.apache.org/docs/2.3.2/category/source-v2">Source Connector</a>: SeaTunnel 支持从各种关系型、图形、NoSQL、文档和内存数据库，以及分布式文件系统（如HDFS）和多种云存储解决方案（如S3和OSS）中读取数据。我们还支持许多常见的SaaS服务的数据读取。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://seatunnel.apache.org/docs/2.3.2/category/transform-v2">Transform Connector</a>: 对于源和目标之间的模式不同的情况，可以使用 Transform 连接器来修改从源读取的模式，使其与目标模式一致。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://seatunnel.apache.org/docs/2.3.2/category/sink-v2">Sink Connector</a>: SeaTunnel 还支持将数据写入各种关系型、图形、NoSQL、文档和内存数据库，以及分布式文件系统（如HDFS）和多种云存储解决方案（如S3和OSS）。我们也支持将数据写入许多常见的SaaS服务。</p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
