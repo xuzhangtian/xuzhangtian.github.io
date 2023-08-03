@@ -121,7 +121,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -139,6 +139,113 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/08/03/seatunnel-engine-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="xuzhangtian">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="空灵画师的小站~">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 空灵画师的小站~">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/08/03/seatunnel-engine-3/" class="post-title-link" itemprop="url">SeaTunnel Engine 设计（二）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-08-03 09:36:49 / 修改时间：11:05:25" itemprop="dateCreated datePublished" datetime="2023-08-03T09:36:49+08:00">2023-08-03</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="TaskExecutionServer"><a href="#TaskExecutionServer" class="headerlink" title="TaskExecutionServer"></a>TaskExecutionServer</h2><p>TaskExecutionServer 的主要功能是负责在每个节点上执行任务。</p>
+<ul>
+<li><p>任务执行：每个 Server 都会运行一个 TaskExecutionServer 的实例。JobMaster 将作业划分为多个 TaskGroup，每个 TaskGroup 包含一组相关联的 Task 。然后，JobMaster 将这些 TaskGroup 分配给不同的 Worker，由各自的 Worker 负责执行。</p>
+</li>
+<li><p>TaskContext：在执行任务时，TaskExecutionServer 会为每个 Task 创建一个 TaskContext 对象，并维护一个 TaskID 到 TaskContext 的映射。TaskContext 是一个包含任务执行所需信息的容器，它存储了任务的状态、数据、依赖关系等。所有关于 Task 的操作都会被封装在 TaskContext 中。</p>
+</li>
+<li><p>OperationService：Task 内部持有一个 OperationService，它是一个提供远程调用和通信能力的服务。这意味着一个 Task 可以通过 OperationService 与其他 Task 或者 JobMaster 进行通信，从而实现任务之间的交互和协作。例如，一个 Task 可以向另一个 Task 请求数据，或者将计算结果汇报给 JobMaster。</p>
+</li>
+<li><p>在同一个 TaskGroup 内的任务之间，数据通道使用本地队列（Local Queue）。而在不同 TaskGroup 之间的数据通道可能会使用分布式队列（例如Hazelcast Ringbuffer），因为这些任务可能会在不同的节点上执行。</p>
+</li>
+</ul>
+<p><img src="/2023/08/03/seatunnel-engine-3/taskGroup.png" alt="taskGroup.png"></p>
+<h2 id="Task"><a href="#Task" class="headerlink" title="Task"></a>Task</h2><p>Task 中最重要的方法之一是 call()，执行器通过调用 Task 的 call() 方法来驱动 Task 的操作。call() 方法将返回一个 ProgressState 的值，通过它，执行器可以判断 Task 是否已经结束，以及是否需要继续调用 call() 方法。如下所示。</p>
+<p><img src="/2023/08/03/seatunnel-engine-3/call.png" alt="call.png"></p>
+<h2 id="线程共享优化"><a href="#线程共享优化" class="headerlink" title="线程共享优化"></a>线程共享优化</h2><p>线程共享优化是在处理大量小任务需要同步执行的情况下，通过让一个线程同时运行多个任务来提高系统效率的一种策略。在这种场景中，如果为每个任务都创建一个独立的线程，将会导致大量线程的创建和销毁，从而浪费大量系统资源。为了避免这种资源浪费，我们可以采用线程共享优化来实现更高效的任务处理。</p>
+<p>具体实现方法如下：</p>
+<ol>
+<li>创建 CooperativeTaskWorker：CooperativeTaskWorker 中包含了一个阻塞任务队列 BlockingQueue 并且实现了 Runnable 的 run() 方法 。</li>
+<li>通过线程池提交 CooperativeTaskWorker。</li>
+<li>run() 方法会循环的从任务队列中拉取 Task，并且调用 Task 的 call() 方法, 根据 call() 方法的返回值判断该 Task 是否结束，没有结束就放入队尾，直到所有任务都运行结束。</li>
+</ol>
+<p><img src="/2023/08/03/seatunnel-engine-3/thread.png" alt="thread.png"></p>
+<p>这也会带来一个问题，即如果一个任务的 call() 方法执行时间非常长，这个线程将一直被占用，导致其他任务的延迟非常严重。</p>
+<p>优化方案一：标记线程共享</p>
+<ol>
+<li>为 Task 提供一个标记，用于标记是否支持线程共享。任务的具体实现中，根据 call() 方法的执行时间，评估是否支持线程共享。通常，如果任务的 call() 方法的执行时间都在毫秒级别，则可以将该任务标记为支持线程共享。</li>
+<li>当任务被标记为支持线程共享时，这些任务会共享一个线程来执行，而不是为每个任务分配独立线程。这样可以避免大量线程的创建和销毁开销，节省系统资源。</li>
+<li>对于不支持线程共享的任务，依然为每个任务分配一个独立线程来执行，确保这些任务可以独立运行，不受其他任务的影响。</li>
+</ol>
+<p>优化方案二：动态线程共享</p>
+<ol>
+<li>将一组任务交给线程池执行，其中任务数量远大于线程数量。这样，多个任务将共享一个线程来执行。</li>
+<li>在线程执行任务的过程中，对任务的 call() 方法执行时间进行监控。如果某个任务的 call() 方法执行时间超过设定阈值（例如100ms），则该线程会从线程池中获取另一个线程，并将后续的任务分配给这个新线程来执行。</li>
+<li>这样做的目的是避免因为某个任务执行时间过长而导致其他任务的延迟过高。通过动态地分配线程，保证任务执行的公平性和高效性。</li>
+<li>对于 call() 方法在超时时间内正常执行的任务，线程会继续执行后续任务，并将该任务放回任务队列等待下一次执行。</li>
+<li>对于某个任务的 call() 方法超时执行次数达到一定限制时，该任务将被移出线程共享队列，并使用一个独立线程来执行。这样可以避免某个任务长期占用共享线程，影响其他任务的执行。</li>
+</ol>
+<p><img src="/2023/08/03/seatunnel-engine-3/o1.png" alt="o1.png"><br><img src="/2023/08/03/seatunnel-engine-3/o2.png" alt="o2.png"><br><img src="/2023/08/03/seatunnel-engine-3/o3.png" alt="o3.png"><br><img src="/2023/08/03/seatunnel-engine-3/o4.png" alt="o4.png"><br><img src="/2023/08/03/seatunnel-engine-3/o5.png" alt="o5.png"><br><img src="/2023/08/03/seatunnel-engine-3/o6.png" alt="o6.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -176,9 +283,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-08-02 09:45:52 / 修改时间：13:46:35" itemprop="dateCreated datePublished" datetime="2023-08-02T09:45:52+08:00">2023-08-02</time>
+      <time title="创建时间：2023-08-02 09:45:52" itemprop="dateCreated datePublished" datetime="2023-08-02T09:45:52+08:00">2023-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-03 10:04:38" itemprop="dateModified" datetime="2023-08-03T10:04:38+08:00">2023-08-03</time>
     </span>
 
   
@@ -207,10 +320,36 @@
 <p>如果任务配置只有一个 Source 和一个 Sink，并且最多只有一个 Transform，我们将按以下顺序简单地构建动作流水线。</p>
 <p><img src="/2023/08/02/seatunnel-engine-2/example1.png" alt="example1.png"></p>
 <p>如果存在多个 Source、多个 Transform 或多个 Sink ，那么会根据 source_table_name 和 result_table_name 来构建动作流水线。在这种情况下，Source 连接器必须有 result_table_name，并且 Transform 连接器必须同时具备 result_table_name 和 source_table_name。<br><img src="/2023/08/02/seatunnel-engine-2/example2.png" alt="example2.png"></p>
-<h3 id="关于并行的设计"><a href="#关于并行的设计" class="headerlink" title="关于并行的设计"></a>关于并行的设计</h3><ul>
+<p>关于并行的设计：</p>
+<ul>
 <li>在 SeaTunnel Engine 中，只有 <code>Source</code> 和 <code>PartitionTransform</code> 这两种连接器支持设置并行性。<code>Source</code> 负责读取数据源的数据，而 <code>PartitionTransform</code> 负责对数据进行转换或处理。通过设置并行性，任务可以被拆分成多个子任务，以实现并行处理数据的目的。</li>
 <li>对于不能设置并行性的动作，它们将继承其上游动作的并行性。这意味着如果一个动作没有显式设置并行性，它将使用其上游动作的并行性设置。如果一个动作有多个上游动作，那么该动作的并行性将是其上游动作并行性的总和。这样的设计保证了整个数据同步任务的并行性会逐级递增，使得数据同步可以更高效地利用计算资源。</li>
 <li>如果一个动作的并行性等于其上游动作的并行性，那么该动作可以与其上游动作链接，并在同一个子任务中运行。这样可以减少任务之间的通信开销，提高任务执行的效率。<br><img src="/2023/08/02/seatunnel-engine-2/parallelism.png" alt="parallelism.png"></li>
+</ul>
+<h3 id="从-LogicalPlan-到-PhysicalPlan"><a href="#从-LogicalPlan-到-PhysicalPlan" class="headerlink" title="从 LogicalPlan 到 PhysicalPlan"></a>从 LogicalPlan 到 PhysicalPlan</h3><p>SeaTunnel Engine 将接收 Clint 发送的 LogicalPlan，然后将其转换为可直接执行的 PhysicalPlan。因此，需要经过转换处理逻辑执行计划，并生成物理执行计划。具体过程如下:</p>
+<ol>
+<li>LogicalPlan</li>
+</ol>
+<p><img src="/2023/08/02/seatunnel-engine-2/logic.png" alt="logic.png"></p>
+<p>在收到 LogicalPlan 后，我们需要移除多余的操作，并验证模式（Transform2 和 Transform5 应该相同）。</p>
+<ol start="2">
+<li>ExecutionPlan</li>
+</ol>
+<p><img src="/2023/08/02/seatunnel-engine-2/execution.png" alt="execution.png"></p>
+<p>在转换为执行计划时：</p>
+<ul>
+<li>需要合并 Transform，合并的依据是 Transform 后数据是否会被拆分。</li>
+<li>将 Shuffle Action 转换为队列。</li>
+<li>转换为多管道执行。</li>
+</ul>
+<ol start="3">
+<li>Physical Plan</li>
+</ol>
+<p><img src="/2023/08/02/seatunnel-engine-2/physical.png" alt="physical.png"></p>
+<p>我们将根据并行度将 Pipeline 拆分为单独的可执行任务，还需要添加 SourceSplitEnumerator 和 SinkAggregatedCommitter 任务。完成这些后，可以将任务发送到任务执行服务。然后，任务可以正常运行。</p>
+<ul>
+<li>SourceSplitEnumerator 的作用是将输入源分片。分片的逻辑是创建任务配置 partitionNum 数量的 Reader, 读取的数据根据不同的 SourceSplitEnumerator 实现逻辑进行分片，并发送给对应的 Reader 进行消费。</li>
+<li>SinkAggregatedCommitter 将进行最后的数据写入。</li>
 </ul>
 
       
