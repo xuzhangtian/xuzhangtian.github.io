@@ -121,7 +121,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -139,6 +139,118 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/08/04/seatunnel-engine-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="xuzhangtian">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="空灵画师的小站~">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 空灵画师的小站~">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/08/04/seatunnel-engine-4/" class="post-title-link" itemprop="url">SeaTunnel Engine 设计（三）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-08-04 10:34:20 / 修改时间：16:09:07" itemprop="dateCreated datePublished" datetime="2023-08-04T10:34:20+08:00">2023-08-04</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="资源管理器设计"><a href="#资源管理器设计" class="headerlink" title="资源管理器设计"></a>资源管理器设计</h2><p>资源管理器是 SeaTunnel Engine 的核心组件之一。在任务初始化完成后，JobMaster 创建的 JobScheduler 会向资源管理器申请所需的资源，只有在成功获得所需资源后，任务才能开始运行。</p>
+<h3 id="Resource-Manager-设计目的"><a href="#Resource-Manager-设计目的" class="headerlink" title="Resource Manager 设计目的"></a>Resource Manager 设计目的</h3><ul>
+<li>提供作业执行所需的资源地址。</li>
+<li>具备在第三方资源管理服务中动态扩展节点的能力。</li>
+<li>每个工作节点可以同时支持运行来自不同作业的多个任务，以充分利用资源。</li>
+<li>如果出现异常情况，工作节点能够及时恢复。</li>
+</ul>
+<h3 id="Resource-定义"><a href="#Resource-定义" class="headerlink" title="Resource 定义"></a>Resource 定义</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Worker</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> Slot[] slots;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Slot</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> Resource resource;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Resource</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> Memory memorySize;</span><br><span class="line">    <span class="comment">// only work on kubernetes</span></span><br><span class="line">    <span class="keyword">private</span> CPU cpu;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>普通的工作节点内存分配：在普通的环境下，SeaTunnel server 可以根据配置和需求，将合适的内存资源分配给每个工作节点，确保工作节点有足够的内存来执行任务。</li>
+<li>在Kubernetes上运行时的资源分配：如果 SeaTunnel server 在 Kubernetes 集群上运行，它可以利用 Kubernetes 的资源管理机制，不仅可以分配内存资源，还可以为运行工作节点的CPU进行资源分配。</li>
+</ul>
+<h3 id="资源申请流程"><a href="#资源申请流程" class="headerlink" title="资源申请流程"></a>资源申请流程</h3><h4 id="独立模式"><a href="#独立模式" class="headerlink" title="独立模式"></a>独立模式</h4><ul>
+<li>启动主节点（Master）和工作节点（Worker），工作节点向资源管理器（ResourceManager）注册信息，并通过定期心跳进行状态监测。</li>
+<li>作业主节点（JobMaster）向资源管理器请求资源。</li>
+<li>若资源充足，资源管理器将提供对应的工作节点信息给作业主节点。若资源不足，则作业主节点将没有足够的资源。</li>
+<li>作业主节点接收到反馈后，决定是否开始调度任务或抛出异常。</li>
+</ul>
+<h4 id="第三方资源管理器模式"><a href="#第三方资源管理器模式" class="headerlink" title="第三方资源管理器模式"></a>第三方资源管理器模式</h4><ul>
+<li>启动主节点（Master）和工作节点（Worker），工作节点向资源管理器（ResourceManager）注册信息，并通过定期心跳进行状态监测。</li>
+<li>作业主节点（JobMaster）向资源管理器请求资源。</li>
+<li>若资源充足，资源管理器将提供对应的工作节点信息给作业主节点。若资源不足，则从第三方资源管理系统申请资源并启动工作节点。</li>
+<li>工作节点向资源管理器注册信息。</li>
+<li>作业主节点接收到反馈后，决定是否开始调度任务或抛出异常。</li>
+<li>作业主节点执行结束后，将资源归还给资源管理器。</li>
+<li>资源管理器根据策略决定是否需要释放工作节点，然后将其返回给第三方资源管理系统或保留给下一个任务使用。</li>
+</ul>
+<p><img src="/2023/08/04/seatunnel-engine-4/process.png" alt="process.png"></p>
+<h3 id="工作节点的任务槽（Slot）分配"><a href="#工作节点的任务槽（Slot）分配" class="headerlink" title="工作节点的任务槽（Slot）分配"></a>工作节点的任务槽（Slot）分配</h3><p>每个工作节点（Worker）需要将其资源划分为多个任务槽（Slots），用于容纳不同的任务。<br>有两种资源分配策略可供选择：</p>
+<ul>
+<li>在工作节点启动时，根据配置信息，将可用资源平均分配给所有任务槽。</li>
+<li>动态分配策略。当某个任务需要资源时，会动态地创建一个相应大小的任务槽，该任务槽将被用来满足任务的资源需求</li>
+</ul>
+<h3 id="JobMaster-和-Worker-之间如何进行通信"><a href="#JobMaster-和-Worker-之间如何进行通信" class="headerlink" title="JobMaster 和 Worker 之间如何进行通信"></a>JobMaster 和 Worker 之间如何进行通信</h3><p>每个任务的位置通过保存 TaskGroupLocation 和 TaskLocation 来记录，JobMaster 维护了每个 TaskGroupLocation 所在的工作节点位置。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TaskLocation</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> TaskGroupLocation taskGroupLocation;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">long</span> taskID;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> index;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TaskGroupLocation</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">long</span> jobId;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">int</span> pipelineId;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">long</span> taskGroupId;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -176,9 +288,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-08-03 09:36:49 / 修改时间：11:05:25" itemprop="dateCreated datePublished" datetime="2023-08-03T09:36:49+08:00">2023-08-03</time>
+      <time title="创建时间：2023-08-03 09:36:49" itemprop="dateCreated datePublished" datetime="2023-08-03T09:36:49+08:00">2023-08-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-08-04 16:10:22" itemprop="dateModified" datetime="2023-08-04T16:10:22+08:00">2023-08-04</time>
     </span>
 
   
@@ -191,9 +309,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="TaskExecutionServer"><a href="#TaskExecutionServer" class="headerlink" title="TaskExecutionServer"></a>TaskExecutionServer</h2><p>TaskExecutionServer 的主要功能是负责在每个节点上执行任务。</p>
-<ul>
-<li><p>任务执行：每个 Server 都会运行一个 TaskExecutionServer 的实例。JobMaster 将作业划分为多个 TaskGroup，每个 TaskGroup 包含一组相关联的 Task 。然后，JobMaster 将这些 TaskGroup 分配给不同的 Worker，由各自的 Worker 负责执行。</p>
+          <h2 id="执行器设计"><a href="#执行器设计" class="headerlink" title="执行器设计"></a>执行器设计</h2><p>执行器是 SeaTunnel Engine 的核心组件之一，它的主要功能是负责在每个节点上执行任务，包括任务的初始化，资源的申请，以及具体的运行等。</p>
+<h3 id="TaskExecutionServer"><a href="#TaskExecutionServer" class="headerlink" title="TaskExecutionServer"></a>TaskExecutionServer</h3><ul>
+<li><p>任务执行：每个 Server 都会运行一个 TaskExecutionServer 的实例。JobMaster 负责将作业拆分成多个 TaskGroup，其中每个 TaskGroup 包含一组相关联的任务。接着，JobMaster 将这些 TaskGroup 分配给一个 JobScheduler。JobScheduler 负责向 ResourceManager 申请所需的资源，并将任务提交到相应的 TaskExecutionServer 上进行执行。</p>
 </li>
 <li><p>TaskContext：在执行任务时，TaskExecutionServer 会为每个 Task 创建一个 TaskContext 对象，并维护一个 TaskID 到 TaskContext 的映射。TaskContext 是一个包含任务执行所需信息的容器，它存储了任务的状态、数据、依赖关系等。所有关于 Task 的操作都会被封装在 TaskContext 中。</p>
 </li>
@@ -203,14 +321,14 @@
 </li>
 </ul>
 <p><img src="/2023/08/03/seatunnel-engine-3/taskGroup.png" alt="taskGroup.png"></p>
-<h2 id="Task"><a href="#Task" class="headerlink" title="Task"></a>Task</h2><p>Task 中最重要的方法之一是 call()，执行器通过调用 Task 的 call() 方法来驱动 Task 的操作。call() 方法将返回一个 ProgressState 的值，通过它，执行器可以判断 Task 是否已经结束，以及是否需要继续调用 call() 方法。如下所示。</p>
+<h3 id="Task"><a href="#Task" class="headerlink" title="Task"></a>Task</h3><p>Task 中最重要的方法之一是 call()，执行器通过调用 Task 的 call() 方法来驱动 Task 的操作。call() 方法将返回一个 ProgressState 的值，通过它，执行器可以判断 Task 是否已经结束，以及是否需要继续调用 call() 方法。如下所示。</p>
 <p><img src="/2023/08/03/seatunnel-engine-3/call.png" alt="call.png"></p>
-<h2 id="线程共享优化"><a href="#线程共享优化" class="headerlink" title="线程共享优化"></a>线程共享优化</h2><p>线程共享优化是在处理大量小任务需要同步执行的情况下，通过让一个线程同时运行多个任务来提高系统效率的一种策略。在这种场景中，如果为每个任务都创建一个独立的线程，将会导致大量线程的创建和销毁，从而浪费大量系统资源。为了避免这种资源浪费，我们可以采用线程共享优化来实现更高效的任务处理。</p>
+<h3 id="线程共享优化"><a href="#线程共享优化" class="headerlink" title="线程共享优化"></a>线程共享优化</h3><p>线程共享优化是在处理大量小任务需要同步执行的情况下，通过让一个线程同时运行多个任务来提高系统效率的一种策略。在这种场景中，如果为每个任务都创建一个独立的线程，将会导致大量线程的创建和销毁，从而浪费大量系统资源。为了避免这种资源浪费，我们可以采用线程共享优化来实现更高效的任务处理。</p>
 <p>具体实现方法如下：</p>
 <ol>
 <li>创建 CooperativeTaskWorker：CooperativeTaskWorker 中包含了一个阻塞任务队列 BlockingQueue 并且实现了 Runnable 的 run() 方法 。</li>
 <li>通过线程池提交 CooperativeTaskWorker。</li>
-<li>run() 方法会循环的从任务队列中拉取 Task，并且调用 Task 的 call() 方法, 根据 call() 方法的返回值判断该 Task 是否结束，没有结束就放入队尾，直到所有任务都运行结束。</li>
+<li>CooperativeTaskWorker 的 run() 方法会循环的从任务队列中拉取 Task，并且调用 Task 的 call() 方法, 根据 call() 方法的返回值判断该 Task 是否结束，没有结束就放入队尾，直到所有任务都运行结束。</li>
 </ol>
 <p><img src="/2023/08/03/seatunnel-engine-3/thread.png" alt="thread.png"></p>
 <p>这也会带来一个问题，即如果一个任务的 call() 方法执行时间非常长，这个线程将一直被占用，导致其他任务的延迟非常严重。</p>
@@ -291,7 +409,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-08-03 10:04:38" itemprop="dateModified" datetime="2023-08-03T10:04:38+08:00">2023-08-03</time>
+      <time title="修改时间：2023-08-04 10:40:36" itemprop="dateModified" datetime="2023-08-04T10:40:36+08:00">2023-08-04</time>
     </span>
 
   
@@ -304,7 +422,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="SeaTunnel-工作流程"><a href="#SeaTunnel-工作流程" class="headerlink" title="SeaTunnel 工作流程"></a>SeaTunnel 工作流程</h2><p><img src="/2023/08/02/seatunnel-engine-2/workflow.png" alt="workflow.png"></p>
+          <h2 id="SeaTunnel-Engine-工作流程"><a href="#SeaTunnel-Engine-工作流程" class="headerlink" title="SeaTunnel Engine 工作流程"></a>SeaTunnel Engine 工作流程</h2><p><img src="/2023/08/02/seatunnel-engine-2/workflow.png" alt="workflow.png"></p>
 <p>如上图所示 SeaTunnel 主要分为 clint 和 server。clint 负责任务的提交，server 负责资源申请和任务调度。</p>
 <h3 id="整个工作流程如下"><a href="#整个工作流程如下" class="headerlink" title="整个工作流程如下"></a>整个工作流程如下</h3><ol>
 <li>Client 需要构建一个 JobImmutableInformation 对象，并提交给 Server。构建时主要初始化 pluginJarsUrls 和 logicalDag。pluginJarsUrls 是任务必须要依赖的 Jar 包路径，包括 source 和 sink 所需要的数据连接驱动。logicalDag 是任务的逻辑有向无环图，用来描述任务处理操作的传递关系。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JobImmutableInformation</span> <span class="keyword">implements</span> <span class="title class_">IdentifiedDataSerializable</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">long</span> jobId;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">long</span> createTime;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Data logicalDag;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> JobConfig jobConfig;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> List&lt;URL&gt; pluginJarsUrls;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
